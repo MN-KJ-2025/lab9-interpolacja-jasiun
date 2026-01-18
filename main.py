@@ -18,8 +18,13 @@ def chebyshev_nodes(n: int = 10) -> np.ndarray | None:
         (np.ndarray): Wektor węzłów Czebyszewa (n,).
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
-
+    if not (isinstance(n, int) and n > 0):
+        return None
+    
+    k = np.arange(n)
+    nodes = np.cos(k * np.pi / (n - 1))
+    
+    return nodes
 
 def bar_cheb_weights(n: int = 10) -> np.ndarray | None:
     """Funkcja tworząca wektor wag dla węzłów Czebyszewa wymiaru (n,).
@@ -31,7 +36,17 @@ def bar_cheb_weights(n: int = 10) -> np.ndarray | None:
         (np.ndarray): Wektor wag dla węzłów Czebyszewa (n,).
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not (isinstance(n, int) and n > 0):
+        return None
+
+    weights = np.ones(n)
+
+    weights[1::2] = -1
+
+    weights[0] *= 0.5
+    weights[-1] *= 0.5
+
+    return weights
 
 
 def barycentric_inte(
@@ -52,7 +67,22 @@ def barycentric_inte(
         (np.ndarray): Wektor wartości funkcji interpolującej (n,).
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not (isinstance(xi, np.ndarray) and isinstance(yi, np.ndarray) and isinstance(wi, np.ndarray) and isinstance(x, np.ndarray)):
+        return None
+    
+    if not (len(xi) == len(yi) and len(yi) == len(wi)):
+        return None
+    
+    results = []
+    for x_val in x:
+        match = np.where(np.isclose(xi, x_val))[0]
+        if len(match) > 0:
+            results.append(yi[match[0]])
+        else:
+            L = wi / (x_val - xi)
+            results.append(np.dot(yi, L) / np.sum(L))
+    
+    return np.array(results)
 
 
 def L_inf(
@@ -71,4 +101,13 @@ def L_inf(
         (float): Wartość normy L-nieskończoność.
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not (isinstance(xr, (int, float, list, np.ndarray)) and isinstance(x,(int, float, list, np.ndarray))):
+        return None
+
+    x1 = np.asarray(xr)
+    x2 = np.asarray(x)
+
+    if(x1.shape != x2.shape):
+        return None
+    
+    return np.max(abs(x1 - x2))
